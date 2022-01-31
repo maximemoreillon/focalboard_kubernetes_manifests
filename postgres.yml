@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: focalboard-db
+  namespace: focalboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: focalboard-db
+  template:
+    metadata:
+      labels:
+        app: focalboard-db
+    spec:
+      containers:
+      - name: focalboard-db
+        image: postgres:13
+        ports:
+        - containerPort: 5432
+        envFrom:
+        - secretRef:
+            name: environment
+        volumeMounts:
+          - mountPath: /var/lib/postgresql/data
+            name: pgdata
+      volumes:
+        - name: pgdata
+          persistentVolumeClaim:
+            claimName: pgdata
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: focalboard-db
+  namespace: focalboard
+spec:
+  type: NodePort
+  selector:
+    app: focalboard-db
+  ports:
+  - port: 5432
+    nodePort: 30431

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: environment
+  namespace: focalboard
+type: Opaque
+stringData:
+  POSTGRES_DB: boards
+  POSTGRES_USER: boardsuser
+  POSTGRES_PASSWORD: boardsuser-password

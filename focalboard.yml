@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: focalboard
+  namespace: focalboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: focalboard
+  template:
+    metadata:
+      labels:
+        app: focalboard
+    spec:
+      enableServiceLinks: false
+      containers:
+      - name: focalboard
+        # image: 172.16.98.151:5000/focalboard
+        image: mattermost/focalboard
+        #imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - secretRef:
+            name: environment
+        volumeMounts:
+          - mountPath: /opt/focalboard/config.json
+            name: focalboard-config
+            subPath: config
+          - mountPath: /data
+            name: fbdata
+      volumes:
+        - name: fbdata
+          persistentVolumeClaim:
+            claimName: fbdata
+        - name: focalboard-config
+          configMap:
+            name: focalboard-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: focalboard
+  namespace: focalboard
+spec:
+  type: NodePort
+  selector:
+    app: focalboard
+  ports:
+  - port: 8000
+    nodePort: 30429
